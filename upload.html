@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upload Daily Report</title>
+  <meta name="description" content="Drop the pharmacy dispensing export to update the Nambe Drugs scorecard.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="page-upload">
+  <div class="up-wrap">
+    <header class="topbar">
+      <img class="logo" src="assets/logo.png" alt="Nambe Drugs Los Alamos">
+      <div class="divider"></div>
+      <div class="title-block">
+        <h1>Upload daily report</h1>
+        <p>Drop the dispensing export. Vaccines and compounds are counted for you.</p>
+      </div>
+      <div class="spacer"></div>
+      <a class="btn btn-secondary" href="./">View scorecard</a>
+    </header>
+
+    <!-- Step 1: drop -->
+    <section class="up-card">
+      <label class="dropzone" id="dropzone" tabindex="0">
+        <input type="file" id="file" accept=".csv,text/csv" multiple hidden>
+        <span class="dz-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg>
+        </span>
+        <span class="dz-title">Drop the CSV here</span>
+        <span class="dz-sub">or click to choose a file · you can drop several at once</span>
+      </label>
+      <ul class="rules">
+        <li><b>Vaccines</b>: rows where Therapeutic Class says “Vaccines”</li>
+        <li><b>Compounds</b>: rows where “Is Compound?” is Yes</li>
+        <li>Days in the file replace those days; every other saved day is kept</li>
+      </ul>
+    </section>
+
+    <!-- Step 2: review + save -->
+    <section class="up-card" id="review" hidden>
+      <div class="up-head">
+        <h2>Check the counts</h2>
+        <span class="muted" id="files-note"></span>
+      </div>
+      <div id="notices"></div>
+      <div class="table-wrap">
+        <table class="up-table">
+          <thead><tr><th>Date</th><th class="num">Vaccines</th><th class="num">Compounds</th><th class="num">Rows read</th><th>On the dashboard</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="save">Save to dashboard</button>
+        <button class="btn btn-secondary" id="download">Download daily.csv</button>
+        <button class="btn btn-tertiary" id="reset">Start over</button>
+      </div>
+      <div id="result" class="result" hidden></div>
+    </section>
+
+    <!-- Settings -->
+    <details class="up-card settings" id="settings">
+      <summary>
+        <span>GitHub connection</span>
+        <span class="conn" id="conn-state">Not set up</span>
+      </summary>
+      <p class="muted">Saving writes the daily totals to <code>data/daily.csv</code> in the dashboard’s GitHub repo. Only the per-day counts are saved; the export file itself never leaves this computer. Set this up once per computer.</p>
+      <div class="form">
+        <label>Access token
+          <input type="password" id="token" autocomplete="off" placeholder="github_pat_…">
+        </label>
+        <label>Repository
+          <input type="text" id="repo" placeholder="owner/repo">
+        </label>
+        <label>Branch <span class="muted">(blank = the repo’s default branch)</span>
+          <input type="text" id="branch" placeholder="main">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="save-settings">Save &amp; test</button>
+        <button class="btn btn-tertiary" id="forget">Forget token</button>
+      </div>
+      <div id="settings-result" class="result" hidden></div>
+    </details>
+  </div>
+
+  <script src="assets/ingest.js"></script>
+  <script src="assets/upload.js"></script>
+</body>
+</html>

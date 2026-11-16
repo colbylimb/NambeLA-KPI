@@ -19,21 +19,47 @@ Counts are by the day each Rx was entered.
 
 When last month is shorter, the comparison uses its last day. For example, Mar 31 compares to Feb 28, and Mar 1–31 compares to Feb 1–28.
 
-## Updating the numbers (once a day at 8 PM)
+## Updating the numbers: drop in the export
 
-All the data lives in one file: **`data/daily.csv`**. Add one line per day:
+Open **`upload.html`** on the dashboard site (for example `https://<your-pages-url>/upload.html`) on the computer you use for the 8 PM export.
 
-```
-date,vaccines,compounds
-2026-11-16,29,23
-```
+![Upload page](docs/upload.png)
 
-- Dates use `YYYY-MM-DD` format.
-- To fix a day, edit its line. Rows can be in any order.
-- A day with no line is treated as "no data". It isn't counted as 0.
-- Lines that start with `#` are comments. While the first line includes the word **SAMPLE**, the header shows a "Sample data" badge. **Delete the sample rows and that comment line once you load real counts.**
+1. Drop the dispensing export (CSV) on the page, or click to choose it. You can drop several files at once.
+2. Check the per-day counts it shows.
+3. Click **Save to dashboard**.
 
-The quickest way to update is in the browser on GitHub: open `data/daily.csv`, click the pencil icon, add the line, and click **Commit changes**. GitHub Pages republishes in about a minute.
+How the export is counted:
+
+| Count | Rule |
+|---|---|
+| **Vaccines** | Rows where **Therapeutic Class** contains "VACCINE" |
+| **Compounds** | Rows where **Is Compound?** is **Yes** |
+| **Day** | The **Dispensed Date** column |
+
+Uploads **add to** what's already saved. They never wipe it.
+
+- A day in the new file replaces that day's counts. Every other saved day is kept.
+- Re-uploading the same file is safe because nothing gets double-counted. The table shows "Already saved."
+- If you upload a corrected file for a day, that day's numbers update, and the table shows "Replaces …" so you can see the old values.
+- The first real upload clears the sample data.
+- To load history, export a longer date range (for example the last 12 months) and drop it once. That fills in the monthly chart and the last-month comparisons.
+
+The export file itself never leaves your computer. The page counts it in the browser and saves only the per-day totals to `data/daily.csv`.
+
+### One-time setup on the upload computer
+
+The page saves to GitHub, so it needs an access token once per computer:
+
+1. On GitHub, go to **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+2. Set **Repository access** to *Only select repositories* and choose this repo.
+3. Under **Permissions**, set **Contents** to *Read and write*. Nothing else is needed.
+4. Pick an expiration (up to a year), generate the token, and copy it.
+5. On `upload.html`, open **GitHub connection**, paste the token, and click **Save & test**.
+
+The token is stored only in that computer's browser. Use **Forget token** to remove it. When it expires, make a new one and paste it in the same place.
+
+No token? Click **Download daily.csv** instead. Then on GitHub, open `data/daily.csv`, choose **Upload files**, and commit the downloaded file.
 
 ## How the screen stays current
 
@@ -53,11 +79,14 @@ The page is built for a 1920×1080 TV and scales to 4K. It also works on phones.
 ## Files
 
 ```
-index.html          page shell
+index.html          the TV dashboard
+upload.html         drop-in page for the daily export
+assets/ingest.js    counts vaccines/compounds and merges by date
+assets/upload.js    upload page logic (saves via the GitHub API)
 assets/styles.css   brand tokens and layout
 assets/app.js       data loading, comparisons and charts (no libraries)
 assets/logo.png     logo
-data/daily.csv      the daily counts (edit this)
+data/daily.csv      the daily counts (written by the upload page)
 ```
 
 ## Preview locally

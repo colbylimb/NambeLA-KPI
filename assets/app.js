@@ -169,6 +169,10 @@
     return fmtLong(y, m, d);
   }
 
+  function compareText(prev, label) {
+    return prev == null ? "<span>No data yet for " + label + "</span>" : "<span>vs <b>" + fmtNum(prev) + "</b> on " + label + "</span>";
+  }
+
   function panelHtml(mt, c) {
     var mName = MONTHS[c.m], pName = MONTHS[c.p.m];
     return '' +
@@ -179,13 +183,13 @@
             '<div class="overline">' + dayLabel(c.y, c.m, c.d) + "</div>" +
             '<div class="value">' + fmtNum(c.day) + "</div>" +
             '<div class="compare">' + deltaPill(c.day, c.dayPrev) +
-              "<span>vs <b>" + fmtNum(c.dayPrev) + "</b> on " + fmtShort(c.p.y, c.p.m, c.pd) + "</span></div>" +
+              compareText(c.dayPrev, fmtShort(c.p.y, c.p.m, c.pd)) + "</div>" +
           "</div>" +
           '<div class="kpi">' +
             '<div class="overline">' + mName + " to date · " + MON[c.m] + " 1–" + c.d + "</div>" +
             '<div class="value">' + fmtNum(c.mtd) + "</div>" +
             '<div class="compare">' + deltaPill(c.mtd, c.mtdPrev) +
-              "<span>vs <b>" + fmtNum(c.mtdPrev) + "</b> on " + MON[c.p.m] + " 1–" + c.pd + "</span></div>" +
+              compareText(c.mtdPrev, MON[c.p.m] + " 1–" + c.pd) + "</div>" +
           "</div>" +
         "</div>" +
         '<div class="chart-card daily">' +
@@ -196,8 +200,10 @@
         "</div>" +
         '<div class="chart-card monthly">' +
           '<div class="chart-head"><h3>Monthly totals</h3>' +
-            '<div class="note">' + (c.pace != null ? "On pace for <b>" + fmtNum(c.pace) + "</b> in " + mName + " · " : "") +
-              pName + " finished at <b>" + fmtNum(c.prevTotal) + "</b></div></div>" +
+            '<div class="note">' + [
+              c.pace != null ? "On pace for <b>" + fmtNum(c.pace) + "</b> in " + mName : "",
+              c.prevTotal != null ? pName + " finished at <b>" + fmtNum(c.prevTotal) + "</b>" : ""
+            ].filter(Boolean).join(" · ") + "</div></div>" +
           '<div class="chart" data-chart="monthly" data-metric="' + mt.key + '"></div>' +
         "</div>" +
       "</section>";
@@ -257,7 +263,7 @@
 
   function niceScale(max, count) {
     if (!max || max <= 0) return { max: 4, step: 1 };
-    var raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var raw = Math.max(1, max / count), mag = Math.pow(10, Math.floor(Math.log10(raw)));   // counts are whole numbers
     var steps = [1, 2, 2.5, 5, 10], step = mag;
     for (var i = 0; i < steps.length; i++) { if (steps[i] * mag >= raw) { step = steps[i] * mag; break; } }
     return { max: Math.ceil(max / step) * step, step: step };
