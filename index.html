@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nambe Drugs Scorecard</title>
+  <meta name="description" content="Daily vaccine and compound counts for Nambe Drugs Los Alamos.">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <img class="logo" src="assets/logo.png" alt="Nambe Drugs Los Alamos">
+      <div class="divider"></div>
+      <div class="title-block">
+        <h1>Daily Scorecard</h1>
+        <p>Vaccines &amp; compounds · updated nightly at 8 PM</p>
+      </div>
+      <div class="spacer"></div>
+      <span class="sample-pill" id="sample-pill" hidden>Sample data</span>
+      <span class="status" id="status">Loading…</span>
+      <div class="clock">
+        <div class="time" id="clock-time">--:--</div>
+        <div class="date" id="clock-date"></div>
+      </div>
+    </header>
+
+    <main class="grid" id="grid">
+      <div class="empty">Loading the latest counts…</div>
+    </main>
+
+    <footer class="footer">
+      <span id="footnote">Comparisons use the same date last month.</span>
+      <span>Nambe Drugs Los Alamos</span>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

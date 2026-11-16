@@ -1,0 +1,239 @@
+/* Nambe Drugs Los Alamos — KPI wall display
+   Tokens follow the Nambe Drugs brand board. */
+:root {
+  --forest: #1D7A4D;
+  --green: #0A9F41;
+  --lime: #50B341;
+  --pine: #0F4A2E;
+  --mint: #DDF0E3;
+
+  --ink-900: #111A15;
+  --ink-800: #2D3832;
+  --ink-600: #59645E;
+  --ink-400: #909A94;
+  --ink-200: #CBD2CE;
+  --ink-100: #EEF1EF;
+  --ink-50:  #F7F9F8;
+
+  --success: #1E9E57;
+  --success-bg: #E3F4EA;
+  --warning: #E08A00;
+  --warning-ink: #8A5500;
+  --warning-bg: #FDF0DC;
+  --error: #D93B3B;
+  --error-bg: #FBE5E5;
+
+  --surface: #FFFFFF;
+  --page: var(--ink-50);
+  --ghost: #D3DAD6;           /* last-month comparison marks */
+
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --shadow-1: 0 1px 2px rgba(17, 26, 21, .10);
+
+  color-scheme: light;
+  /* Scales the whole display with the screen: 16px on a 1920×1080 TV. */
+  font-size: max(11px, min(0.8333vw, 1.4815vh));
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+
+body {
+  background: var(--page);
+  color: var(--ink-900);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  cursor: none;               /* hide the mouse on the wall display */
+}
+body.has-pointer { cursor: default; }
+
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem 0.75rem;
+}
+
+/* ---------- Header ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 0.85rem 1.5rem;
+}
+.topbar .logo { height: 3.6rem; width: auto; display: block; }
+.topbar .divider { width: 1px; align-self: stretch; background: var(--ink-100); }
+.title-block h1 {
+  margin: 0;
+  font-size: 2rem; line-height: 2.5rem; font-weight: 700;
+  color: var(--pine); letter-spacing: -0.01em;
+}
+.title-block p {
+  margin: 0.1rem 0 0;
+  font-size: 0.95rem; color: var(--ink-600);
+}
+.topbar .spacer { flex: 1; }
+
+.status {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.95rem; font-weight: 600;
+  background: var(--mint); color: var(--pine);
+  white-space: nowrap;
+}
+.status svg { width: 1.1rem; height: 1.1rem; }
+.status.is-warning { background: var(--warning-bg); color: var(--warning-ink); }
+.status.is-error { background: var(--error-bg); color: #9E2323; }
+.sample-pill {
+  border-radius: 999px; padding: 0.35rem 0.8rem;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  border: 1px solid var(--warning); color: var(--warning-ink); background: var(--surface);
+}
+
+.clock { text-align: right; }
+.clock .time {
+  font-size: 2rem; line-height: 2.4rem; font-weight: 700; color: var(--ink-900);
+  letter-spacing: -0.01em;
+}
+.clock .date { font-size: 0.95rem; color: var(--ink-600); }
+
+/* ---------- Panels ---------- */
+.grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.panel {
+  min-height: 0;
+  display: flex; flex-direction: column; gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-1);
+  padding: 1.25rem 1.5rem 1.25rem;
+}
+
+.panel-head { display: flex; align-items: center; gap: 0.85rem; }
+.panel-icon {
+  width: 2.75rem; height: 2.75rem; border-radius: 12px;
+  background: var(--mint); color: var(--pine);
+  display: grid; place-items: center;
+}
+.panel-icon svg { width: 1.6rem; height: 1.6rem; }
+.panel-head h2 {
+  margin: 0; font-size: 1.75rem; line-height: 2.1rem; font-weight: 700; color: var(--pine);
+}
+
+/* KPI tiles */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.kpi {
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-card);
+  padding: 1rem 1.25rem 1.1rem;
+  background: var(--surface);
+}
+.kpi.is-primary { background: linear-gradient(135deg, var(--forest), var(--pine)); border-color: transparent; color: #fff; }
+.overline {
+  font-size: 0.8rem; line-height: 1.1rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-600);
+}
+.kpi.is-primary .overline { color: rgba(255,255,255,.78); }
+.kpi .value {
+  font-size: 4.6rem; line-height: 1; font-weight: 700; letter-spacing: -0.03em;
+  margin: 0.55rem 0 0.7rem;
+}
+.kpi .compare {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  font-size: 1rem; color: var(--ink-600);
+}
+.kpi.is-primary .compare { color: rgba(255,255,255,.85); }
+.kpi .compare b { color: var(--ink-900); font-weight: 600; }
+.kpi.is-primary .compare b { color: #fff; }
+
+.delta {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  border-radius: 999px; padding: 0.22rem 0.65rem;
+  font-size: 0.95rem; font-weight: 700;
+}
+.delta svg { width: 0.95rem; height: 0.95rem; }
+.delta.up   { background: var(--success-bg); color: #13703D; }
+.delta.down { background: var(--error-bg);   color: #A32B2B; }
+.delta.flat { background: var(--ink-100);    color: var(--ink-800); }
+
+/* Charts */
+.chart-card {
+  flex: 1 1 0; min-height: 0;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-card);
+  padding: 0.9rem 1.1rem 0.6rem;
+}
+.chart-card.daily { flex-grow: 1.15; }
+.chart-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+.chart-head h3 { margin: 0; font-size: 1.15rem; line-height: 1.6rem; font-weight: 600; color: var(--ink-900); }
+.chart-head .note { font-size: 0.95rem; color: var(--ink-600); }
+.chart-head .note b { color: var(--ink-900); font-weight: 600; }
+.legend { display: flex; gap: 1.1rem; font-size: 0.9rem; color: var(--ink-600); white-space: nowrap; }
+.legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.legend i { width: 0.8rem; height: 0.8rem; border-radius: 3px; display: inline-block; }
+.legend i.dashed { background: transparent !important; border: 2px dashed var(--lime); }
+
+.chart { flex: 1; min-height: 0; position: relative; }
+.chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+.chart .grid-line { stroke: var(--ink-100); stroke-width: 1; }
+.chart .baseline  { stroke: var(--ink-200); stroke-width: 1; }
+.chart .tick      { fill: var(--ink-400); font-size: 0.8rem; }
+.chart .tick.strong { fill: var(--ink-900); font-weight: 700; }
+.chart .val       { fill: var(--ink-900); font-size: 0.95rem; font-weight: 700; }
+.chart .val.muted { fill: var(--ink-600); font-weight: 600; }
+
+/* ---------- Footer ---------- */
+.footer {
+  display: flex; justify-content: space-between; gap: 1rem;
+  font-size: 0.8rem; color: var(--ink-400);
+  padding: 0 0.25rem;
+}
+
+/* Loading / empty */
+.empty {
+  grid-column: 1 / -1;
+  display: grid; place-items: center;
+  color: var(--ink-600); font-size: 1.2rem;
+}
+
+/* ---------- Small screens (phones, laptops in portrait) ---------- */
+@media (max-width: 1000px) {
+  :root { font-size: 14px; }
+  body { overflow: auto; cursor: default; }
+  .app { height: auto; padding: 16px; gap: 16px; }
+  .topbar { flex-wrap: wrap; padding: 12px 16px; gap: 12px; }
+  .topbar .divider, .topbar .spacer { display: none; }
+  .topbar .logo { height: 44px; }
+  .title-block h1 { font-size: 1.5rem; line-height: 2rem; }
+  .clock { text-align: left; width: 100%; display: flex; gap: 12px; align-items: baseline; }
+  .clock .time { font-size: 1.25rem; }
+  .grid { grid-template-columns: 1fr; }
+  .panel { padding: 16px; }
+  .kpi .value { font-size: 2.75rem; }
+  .chart-card { flex: none; }
+  .chart { flex: none; height: 220px; }
+  .chart-head { flex-wrap: wrap; }
+  .footer { flex-direction: column; }
+}
