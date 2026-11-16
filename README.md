@@ -15,6 +15,8 @@ For each of **Vaccines** and **Compounds**:
 | **Day by day** | This month's daily bars (green), with last month's same dates as gray bars behind them. The latest day is lime. | |
 | **Monthly totals** | The last 12 months. The current month shows the total so far (lime) and a dashed outline for where it's on pace to finish. | |
 
+Counts are by the day each Rx was entered.
+
 When last month is shorter, the comparison uses its last day. For example, Mar 31 compares to Feb 28, and Mar 1–31 compares to Feb 1–28.
 
 ## Updating the numbers (once a day at 8 PM)
