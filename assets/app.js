@@ -133,16 +133,18 @@
 
     var dimCur = daysIn(y, m);
 
-    // Last 12 months of totals, current month = month to date.
-    out.monthly = [];
-    for (var k = -11; k <= 0; k++) {
-      var mm = addMonths(y, m, k);
-      var last = k === 0 ? d : daysIn(mm.y, mm.m);
-      out.monthly.push({ y: mm.y, m: mm.m, total: sumRange(metric, mm.y, mm.m, 1, last), current: k === 0 });
+    // Running totals by day of month: this month through the latest day, and all of last month.
+    var dimPrev = daysIn(p.y, p.m), runCur = 0, runPrev = 0, anyPrev = false;
+    out.run = [];
+    for (var i = 1; i <= dimCur; i++) {      // the x-axis is this month's days
+      var vc = i <= d ? val(metric, y, m, i) : null, vp = i <= dimPrev ? val(metric, p.y, p.m, i) : null;
+      if (vc != null) runCur += vc;
+      if (vp != null) { runPrev += vp; anyPrev = true; }
+      out.run.push({ day: i, cur: i <= d ? runCur : null, prev: i <= dimPrev && anyPrev ? runPrev : null });
     }
-    var dim = dimCur;
-    out.pace = out.mtd != null && d < dim ? Math.round(out.mtd / d * dim) : null;
-    out.prevTotal = out.monthly[10].total;
+    out.dim = dimCur;
+    out.pace = out.mtd != null && d < dimCur ? Math.round(out.mtd / d * dimCur) : null;
+    out.prevTotal = sumRange(metric, p.y, p.m, 1, dimPrev);
     return out;
   }
 
@@ -191,11 +193,14 @@
           "</div>" +
         "</div>" +
         '<div class="chart-card monthly">' +
-          '<div class="chart-head"><h3>Monthly totals</h3>' +
-            '<div class="note">' + [
+          '<div class="chart-head"><h3>' + mName + ' so far</h3>' +
+            '<div class="legend"><span><i class="line"></i>' + MON[c.m] + '</span>' +
+            '<span><i class="line dashed-gray"></i>' + MON[c.p.m] + '</span>' +
+            (c.pace != null ? '<span><i class="line dotted-lime"></i>Pace</span>' : '') + '</div></div>' +
+          '<div class="note sub">' + [
               c.pace != null ? "On pace for <b>" + fmtNum(c.pace) + "</b>" : "",
-              c.prevTotal != null ? MON[c.p.m] + " total <b>" + fmtNum(c.prevTotal) + "</b>" : ""
-            ].filter(Boolean).join(" · ") + "</div></div>" +
+              c.prevTotal != null ? pName + " finished at <b>" + fmtNum(c.prevTotal) + "</b>" : ""
+            ].filter(Boolean).join(" · ") + "</div>" +
           '<div class="chart" data-chart="monthly" data-metric="' + mt.key + '"></div>' +
         "</div>" +
       "</section>";
@@ -285,49 +290,55 @@
     return { svg: svg, W: W, H: H, m: m, pw: pw, ph: ph, y: y, R: R };
   }
 
+  // "Month so far": running total for this month vs last month, by day of month.
   function drawMonthly(host, c) {
-    var data = c.monthly, n = data.length;
-    var maxV = Math.max(c.pace || 0, Math.max.apply(null, data.map(function (p) { return p.total || 0; })));
-    var f = frame(host, maxV, 3), slot = f.pw / n, R = f.R;
-    var bw = Math.max(6, Math.min(slot * 0.58, 4 * R)), base = f.y(0);
+    var data = c.run, n = data.length, R = rem();
+    var maxV = Math.max(c.pace || 0, c.prevTotal || 0, c.mtd || 0);
+    var f = frame(host, maxV, 3);
+    f.m.r = 0.75 * R;  // room for the end dot
+    var x = function (day) { return f.m.l + (day - 1) / Math.max(1, n - 1) * (f.pw - 0.5 * R); };
+    function line(key, upto) {
+      var pts = data.filter(function (p) { return p[key] != null && p.day <= upto; });
+      return pts.map(function (p, i) { return (i ? "L" : "M") + x(p.day).toFixed(1) + "," + f.y(p[key]).toFixed(1); }).join("");
+    }
 
-    data.forEach(function (p, i) {
-      var cx = f.m.l + slot * i + slot / 2, x = cx - bw / 2;
-      if (p.current && c.pace != null && c.pace > (p.total || 0)) {
-        var py = f.y(c.pace);
-        f.svg.appendChild(el("path", {
-          d: barPath(x + 1, py + 1, bw - 2, base - py - 1, 4),
-          fill: "none", stroke: COLORS.accent, "stroke-width": 2, "stroke-dasharray": "5 4"
-        }));
+    // Last month: dashed gray reference line.
+    var prevPath = line("prev", n);
+    if (prevPath) f.svg.appendChild(el("path", { d: prevPath, fill: "none", stroke: "#9AA49E", "stroke-width": 2.5, "stroke-dasharray": "7 6", "stroke-linejoin": "round", "stroke-linecap": "round" }));
+
+    // This month: soft area + solid line, ending at the latest day.
+    var curPath = line("cur", c.d);
+    if (curPath) {
+      var gid = "g-" + Math.random().toString(36).slice(2, 8);
+      var defs = el("defs", {}), grad = el("linearGradient", { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
+      grad.appendChild(el("stop", { offset: "0", "stop-color": COLORS.bar, "stop-opacity": 0.22 }));
+      grad.appendChild(el("stop", { offset: "1", "stop-color": COLORS.bar, "stop-opacity": 0.02 }));
+      defs.appendChild(grad); f.svg.appendChild(defs);
+      var base = f.y(0);
+      f.svg.appendChild(el("path", { d: curPath + "L" + x(c.d).toFixed(1) + "," + base + "L" + x(1).toFixed(1) + "," + base + "Z", fill: "url(#" + gid + ")" }));
+      // Projection to month end (dotted lime) when on pace.
+      if (c.pace != null) {
+        f.svg.appendChild(el("path", { d: "M" + x(c.d) + "," + f.y(c.mtd) + "L" + x(c.dim) + "," + f.y(c.pace),
+          fill: "none", stroke: COLORS.accent, "stroke-width": 2.5, "stroke-dasharray": "2 6", "stroke-linecap": "round" }));
       }
-      if (p.total != null && p.total > 0) {
-        f.svg.appendChild(el("path", {
-          d: barPath(x, f.y(p.total), bw, base - f.y(p.total), 4),
-          fill: p.current ? COLORS.accent : COLORS.bar
-        }));
-      }
-      // Narrow slots: label only the current month and shorten month names.
-      var narrow = slot < 3.2 * R, tiny = slot < 2.2 * R;
-      var labelled = narrow ? p.current : i >= n - 2;
-      if (labelled && p.total != null) {
-        var top = p.current && c.pace != null ? Math.min(f.y(p.total), f.y(c.pace)) : f.y(p.total);
-        var txt = fmtNum(p.total) + (p.current && !narrow ? " so far" : "");
-        var halfW = txt.length * 0.3 * R, tx = cx, anchor = "middle";
-        if (cx + halfW > f.W) { tx = f.W; anchor = "end"; }   // keep the last label inside the card
-        f.svg.appendChild(el("text", {
-          x: tx, y: top - 0.45 * R, "text-anchor": anchor, "class": p.current ? "val" : "val muted"
-        }, txt));
-      }
-      var lbl = tiny ? MON[p.m].charAt(0) : narrow ? MON[p.m] : MON[p.m] + (p.m === 0 ? " ’" + String(p.y).slice(2) : "");
-      f.svg.appendChild(el("text", {
-        x: cx, y: f.H - 0.35 * R, "text-anchor": "middle", "class": p.current ? "tick strong" : "tick"
-      }, lbl));
-      var hit = el("rect", { x: f.m.l + slot * i, y: f.m.t, width: slot, height: f.ph, fill: "transparent" });
-      hit.appendChild(el("title", {}, MONTHS[p.m] + " " + p.y + ": " + fmtNum(p.total) + (p.current ? " (month to date)" : "")));
-      f.svg.appendChild(hit);
+      f.svg.appendChild(el("path", { d: curPath, fill: "none", stroke: COLORS.bar, "stroke-width": 3.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      var ex = x(c.d), ey = f.y(c.mtd);
+      f.svg.appendChild(el("circle", { cx: ex, cy: ey, r: 7, fill: COLORS.accent, stroke: COLORS.surface, "stroke-width": 3 }));
+      var anchor = ex > f.W - 4 * R ? "end" : "middle";
+      f.svg.appendChild(el("text", { x: anchor === "end" ? ex : ex, y: ey - 0.9 * R, "text-anchor": anchor, "class": "val" }, fmtNum(c.mtd)));
+    }
+
+    // Day-of-month ticks: 1, every 5th, the last day, and the latest day in bold.
+    var show = {}; show[1] = true; for (var k = 5; k <= n; k += 5) show[k] = true; show[n] = true;
+    Object.keys(show).forEach(function (k) { if (Math.abs(+k - c.d) < 3) delete show[k]; });
+    if (show[30] && n === 31) delete show[30];
+    show[c.d] = "strong";
+    Object.keys(show).forEach(function (k) {
+      f.svg.appendChild(el("text", { x: x(+k), y: f.H - 0.35 * R, "text-anchor": "middle",
+        "class": show[k] === "strong" ? "tick strong" : "tick" }, k));
     });
 
-    f.svg.setAttribute("aria-label", "Monthly totals for the last 12 months");
+    f.svg.setAttribute("aria-label", MONTHS[c.m] + " running total compared with " + MONTHS[c.p.m]);
     host.replaceChildren(f.svg);
   }
 

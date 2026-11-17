@@ -239,6 +239,10 @@ body:not(.has-pointer) .gear { cursor: none; }
 .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
 .legend i { width: 0.8rem; height: 0.8rem; border-radius: 3px; display: inline-block; }
 .legend i.dashed { background: transparent !important; border: 2px dashed var(--lime); }
+.legend i.line { width: 1.4rem; height: 0; border-radius: 0; border-top: 3.5px solid var(--forest); }
+.legend i.line.dashed-gray { border-top: 2.5px dashed #9AA49E; }
+.legend i.line.dotted-lime { border-top: 3px dotted var(--lime); }
+.note.sub { margin: -0.15rem 0 0.25rem; }
 
 .chart { flex: 1; min-height: 0; position: relative; }
 .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }

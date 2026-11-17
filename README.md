@@ -12,7 +12,7 @@ For each of **Rx Processed**, **Vaccines** and **Compounds**:
 |---|---|---|
 | **Today** (green tile, top) | Count for the latest day in the data | The same date last month (Nov 16 vs Oct 16) |
 | **Month to date** | Total from the 1st through the latest day | The same days last month (Nov 1–16 vs Oct 1–16) |
-| **Monthly totals** | The last 12 months. The current month shows the total so far (lime) and a dashed outline for where it's on pace to finish. | |
+| **Month so far** | This month's running total day by day (green line), plus a dotted line to where it's on pace to finish | Last month's running total (gray dashed) |
 
 Counts are by the day each Rx was entered.
 
@@ -43,7 +43,7 @@ Uploads **add to** what's already saved. They never wipe it.
 - Re-uploading the same file is safe because nothing gets double-counted. The table shows "Already saved."
 - If you upload a corrected file for a day, that day's numbers update, and the table shows "Replaces …" so you can see the old values.
 - The first real upload clears the sample data.
-- To load history, export a longer date range (for example the last 12 months) and drop it once. That fills in the monthly chart and the last-month comparisons.
+- To load history, export a longer date range (for example the last 12 months) and drop it once. That fills in the last-month comparisons.
 
 The export file itself never leaves your computer. The page counts it in the browser and saves only the per-day totals to `data/daily.csv`.
 
