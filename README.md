@@ -1,12 +1,12 @@
 # Nambe Drugs Los Alamos: Daily Scorecard
 
-A wall display for the team that shows **total Rx**, **vaccines** and **compounds** each day and across each month, in the Nambe Drugs brand style.
+A wall display for the team that shows **Rx processed**, **vaccines** and **compounds** each day and across each month, in the Nambe Drugs brand style.
 
 ![Preview](docs/preview.png)
 
 ## What's on the screen
 
-For each of **Total Rx**, **Vaccines** and **Compounds**:
+For each of **Rx Processed**, **Vaccines** and **Compounds**:
 
 | Tile / chart | What it shows | Compared with |
 |---|---|---|
@@ -20,7 +20,7 @@ When last month is shorter, the comparison uses its last day. For example, Mar 3
 
 ## Updating the numbers: drop in the export
 
-Open **`upload.html`** on the dashboard site (for example `https://<your-pages-url>/upload.html`) on the computer you use for the 8 PM export.
+Open **`upload.html`** on the dashboard site (for example `https://<your-pages-url>/upload.html`) on any computer. This is the manual option; see *Automatic nightly update* below for the hands-off setup.
 
 ![Upload page](docs/upload.png)
 
@@ -32,7 +32,7 @@ How the export is counted:
 
 | Count | Rule |
 |---|---|
-| **Total Rx** | Every row with a date (one row per prescription) |
+| **Rx Processed** | Every row with a date (one row per prescription) |
 | **Vaccines** | Rows where **Therapeutic Class** contains "VACCINE" |
 | **Compounds** | Rows where **Is Compound?** is **Yes** |
 | **Day** | The **Dispensed Date** column |
@@ -61,10 +61,16 @@ The token is stored only in that computer's browser. Use **Forget token** to rem
 
 No token? Click **Download daily.csv** instead. Then on GitHub, open `data/daily.csv`, choose **Upload files**, and commit the downloaded file.
 
+## Automatic nightly update (Outlook → Power Automate → GitHub)
+
+The plan is hands-off. The pharmacy system emails the CSV export at 11:45 PM. At 11:59 PM a Power Automate flow counts it with an Office Script (which also keeps a backup table in a SharePoint Excel workbook) and writes the merged totals to `data/daily.csv`. It uses the same counting and merge rules as the upload page.
+
+To set it up, paste [`docs/power-automate-setup-prompt.md`](docs/power-automate-setup-prompt.md) into a Claude chat and follow along.
+
 ## How the screen stays current
 
-- The page re-reads `daily.csv` every 10 minutes, so the 8 PM update appears on its own. Nobody has to touch the TV.
-- The header pill turns **amber** ("Waiting on 8 PM update") if it's after 8:30 PM and today's row isn't in the file yet. It turns **red** if the file can't be loaded. In that case the last numbers stay on screen.
+- The page re-reads `daily.csv` every 10 minutes, so the nightly update appears on its own. Nobody has to touch the TV.
+- The header pill turns **amber** ("Waiting on nightly update") if it's after 12:30 AM and yesterday's row isn't in the file yet. It turns **red** if the file can't be loaded. In that case the last numbers stay on screen.
 - The page fully reloads at 3 AM each night to pick up any design changes.
 - The mouse cursor hides itself on the display.
 

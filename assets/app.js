@@ -1,6 +1,6 @@
 /* Nambe Drugs Los Alamos — KPI wall display.
  * Reads data/daily.csv (date,rx,vaccines,compounds), one row per day.
- * The CSV is updated once a day at 8 PM; this page re-checks it every
+ * The CSV is updated once a day just before midnight; this page re-checks it every
  * 10 minutes, so the screen picks up the new numbers on its own.
  */
 (function () {
@@ -8,10 +8,11 @@
 
   var DATA_URL = "data/daily.csv";
   var REFRESH_MS = 10 * 60 * 1000;      // re-read the CSV every 10 minutes
-  var UPDATE_HOUR = 20, UPDATE_GRACE_MIN = 30; // expect new data by 8:30 PM
+  // A day's counts arrive at ~11:59 PM that night; allow until 12:30 AM before flagging them late.
+  var DUE_AFTER_MIN = 24 * 60 + 30;   // minutes after the start of a day that its data is due
 
   var METRICS = [
-    { key: "rx",        name: "Total Rx",  unit: "prescriptions",  icon: "pill" },
+    { key: "rx",        name: "Rx Processed", unit: "prescriptions",  icon: "pill" },
     { key: "vaccines",  name: "Vaccines",  unit: "vaccines given", icon: "syringe" },
     { key: "compounds", name: "Compounds", unit: "compounds made", icon: "flask" }
   ];
@@ -217,14 +218,15 @@
     var el = document.getElementById("status");
     if (!state.latest) { el.className = "status is-error"; el.innerHTML = icon("alert") + "No data yet"; return; }
     var L = state.latest, now = new Date();
-    var afterUpdate = now.getHours() * 60 + now.getMinutes() >= UPDATE_HOUR * 60 + UPDATE_GRACE_MIN;
-    var expected = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (afterUpdate ? 0 : 1));
+    // Latest day whose data should be in by now (yesterday, once it's past 12:30 AM).
+    var due = new Date(now.getTime() - DUE_AFTER_MIN * 60000);
+    var expected = new Date(due.getFullYear(), due.getMonth(), due.getDate());
     var latest = new Date(L.y, L.m, L.d);
     var through = "Data through " + fmtLong(L.y, L.m, L.d);
     if (!state.lastFetchOk) {
       el.className = "status is-error"; el.innerHTML = icon("alert") + "Can’t reach data · showing " + fmtShort(L.y, L.m, L.d);
     } else if (latest < expected) {
-      el.className = "status is-warning"; el.innerHTML = icon("clock") + "Waiting on 8 PM update · " + through;
+      el.className = "status is-warning"; el.innerHTML = icon("clock") + "Waiting on nightly update · " + through;
     } else {
       el.className = "status"; el.innerHTML = icon("check") + through;
     }

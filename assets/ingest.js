@@ -1,7 +1,7 @@
 /* Turns a pharmacy dispensing export into daily counts and merges them
  * into data/daily.csv.
  *
- *   Total Rx  = every dated row (one row per prescription)
+ *   Rx Processed = every dated row (one row per prescription)
  *   Vaccines  = rows whose Therapeutic Class contains "VACCINE"
  *   Compounds = rows whose "Is Compound?" column is Yes
  *
