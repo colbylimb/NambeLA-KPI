@@ -2,7 +2,7 @@
  * into data/daily.csv.
  *
  *   Rx Processed = every dated row (one row per prescription)
- *   Vaccines  = rows whose Therapeutic Class contains "VACCINE"
+ *   Vaccines  = rows whose Therapeutic Class contains "VACCINE" or "TOXOID" (Tdap/Td are filed as toxoids)
  *   Compounds = rows whose "Is Compound?" column is Yes
  *
  * Merging is by date: a date that appears in the new file replaces that
@@ -84,7 +84,7 @@
       if (!date) { skipped++; continue; }                                          // totals/footer lines
       var day = days[date] || (days[date] = { rx: 0, vaccines: 0, compounds: 0 });
       day.rx++; counted++;
-      if (cClass >= 0 && /vaccin/i.test(row[cClass] || "")) day.vaccines++;
+      if (cClass >= 0 && /vaccin|toxoid/i.test(row[cClass] || "")) day.vaccines++;
       if (cComp >= 0 && /^\s*(y|yes|true|1)\s*$/i.test(row[cComp] || "")) day.compounds++;
     }
     if (!counted) throw new Error("No rows with a readable date were found.");

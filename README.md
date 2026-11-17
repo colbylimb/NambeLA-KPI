@@ -33,7 +33,7 @@ How the export is counted:
 | Count | Rule |
 |---|---|
 | **Rx Processed** | Every row with a date (one row per prescription) |
-| **Vaccines** | Rows where **Therapeutic Class** contains "VACCINE" |
+| **Vaccines** | Rows where **Therapeutic Class** contains "VACCINE" or "TOXOID" (Tdap shots are filed as toxoids) |
 | **Compounds** | Rows where **Is Compound?** is **Yes** |
 | **Day** | The **Dispensed Date** column |
 

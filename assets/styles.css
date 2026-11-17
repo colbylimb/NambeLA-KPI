@@ -110,16 +110,17 @@ body.has-pointer { cursor: default; }
 .gear {
   width: 2.75rem; height: 2.75rem; border-radius: 12px; flex: none;
   display: grid; place-items: center;
-  color: var(--ink-400); text-decoration: none;
+  background: var(--mint); color: var(--pine); text-decoration: none;
   transition: background .15s, color .15s;
 }
-.gear svg { width: 1.5rem; height: 1.5rem; }
-.gear:hover, .gear:focus-visible { background: var(--mint); color: var(--pine); outline: none; }
+.gear svg { width: 1.6rem; height: 1.6rem; }
+.gear:hover, .gear:focus-visible { background: var(--forest); color: #fff; outline: none; }
+body:not(.has-pointer) .gear { cursor: none; }
 
 /* ---------- After-hours screensaver ---------- */
 .screensaver {
   position: fixed; inset: 0; z-index: 100;
-  background: linear-gradient(135deg, var(--forest) 0%, var(--pine) 100%);
+  background: linear-gradient(135deg, #34A56B 0%, var(--forest) 100%);
   color: #fff; overflow: hidden;
   display: grid; place-items: center;
   opacity: 0; transition: opacity 1.2s ease;
@@ -143,13 +144,11 @@ body.has-pointer { cursor: default; }
   font-size: 9rem; line-height: 1; font-weight: 700; letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
+.ss-time { text-shadow: 0 2px 12px rgba(15, 74, 46, .25); }
 .ss-date {
-  margin-top: 1rem;
-  font-size: 2rem; line-height: 2.5rem; font-weight: 500; color: var(--mint);
+  margin-top: 1.1rem;
+  font-size: 2.2rem; line-height: 2.75rem; font-weight: 500; color: #fff; opacity: .92;
 }
-.ss-rule { width: 4rem; height: 4px; border-radius: 4px; background: var(--lime); margin: 2.25rem 0 1.75rem; }
-.ss-tag { font-size: 1.6rem; font-weight: 600; color: rgba(255, 255, 255, .92); }
-.ss-tag span { color: #8FD982; }
 
 /* ---------- Panels ---------- */
 .grid {
@@ -395,5 +394,4 @@ html:has(body.page-upload) { font-size: 16px; }
   .ss-badge img { height: 7rem; }
   .ss-time { font-size: 5rem; white-space: nowrap; }
   .ss-date { font-size: 1.4rem; }
-  .ss-tag { font-size: 1.2rem; }
 }

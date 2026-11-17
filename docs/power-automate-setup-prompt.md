@@ -16,7 +16,7 @@ I need step-by-step help building a nightly Microsoft 365 automation. I'm not a 
 ## The input
 
 - Every night at **11:45 PM (Mountain Time, America/Denver)** our pharmacy system emails a **CSV attachment** to my Outlook inbox. I'll tell you the sender address and subject line when we get there.
-- The CSV columns: **`Dispensed Date`**, **`Vaccine`** (actually the drug name), **`Is Compound?`**, **`Therapeutic Class`**. One row per prescription.
+- The CSV columns: **`Dispensed Date`** (the header has trailing spaces, so trim header names before matching), **`Medication`**, **`Is Compound?`**, **`Therapeutic Class`**. One row per prescription. Line endings are CRLF. Compound rows often have an empty Therapeutic Class. A real export is about 5,000 rows for half a month.
 - Dates look like `11/9/2026` (M/D/YYYY, no leading zeros, sometimes possibly with a time after them).
 - Some Therapeutic Class values contain commas and are quoted, e.g. `"ANXIOLYTICS,SEDATIVES,AND HYPNOTICS,MISC"`, so the CSV must be parsed properly (quote-aware), not just split on commas.
 - The file may have title lines above the header and a total/footer line at the bottom. Find the header row by looking for the `Dispensed Date` column, and skip any row whose date doesn't parse.
@@ -25,7 +25,7 @@ I need step-by-step help building a nightly Microsoft 365 automation. I'm not a 
 
 Group rows by **Dispensed Date**. For each date:
 - **rx** (shown as "Rx Processed") = number of rows with a valid date
-- **vaccines** = rows where `Therapeutic Class` contains "VACCIN" (case-insensitive)
+- **vaccines** = rows where `Therapeutic Class` contains "VACCIN" or "TOXOID" (case-insensitive; Tdap shots like Boostrix are filed under TOXOIDS)
 - **compounds** = rows where `Is Compound?` is Yes / Y / True / 1 (case-insensitive)
 
 **Merge rule:** a date that appears in the new export **replaces** that date's row; every other date already in `daily.csv` is kept unchanged. Re-running on the same email must not double-count.
