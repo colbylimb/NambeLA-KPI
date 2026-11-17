@@ -1,6 +1,7 @@
 /* Turns a pharmacy dispensing export into daily counts and merges them
  * into data/daily.csv.
  *
+ *   Total Rx  = every dated row (one row per prescription)
  *   Vaccines  = rows whose Therapeutic Class contains "VACCINE"
  *   Compounds = rows whose "Is Compound?" column is Yes
  *
@@ -59,7 +60,7 @@
     return -1;
   }
 
-  /** Read one export. Returns { days: {date: {vaccines, compounds, rows}}, rows, skipped, columns }. */
+  /** Read one export. Returns { days: {date: {rx, vaccines, compounds}}, rows, skipped, columns }. */
   function summarizeExport(text) {
     var rows = parseCsvRows(text);
     var hIdx = -1, header;
@@ -81,8 +82,8 @@
       if (!row.some(function (c) { return String(c).trim() !== ""; })) continue;   // blank line
       var date = parseDate(row[cDate]);
       if (!date) { skipped++; continue; }                                          // totals/footer lines
-      var day = days[date] || (days[date] = { vaccines: 0, compounds: 0, rows: 0 });
-      day.rows++; counted++;
+      var day = days[date] || (days[date] = { rx: 0, vaccines: 0, compounds: 0 });
+      day.rx++; counted++;
       if (cClass >= 0 && /vaccin/i.test(row[cClass] || "")) day.vaccines++;
       if (cComp >= 0 && /^\s*(y|yes|true|1)\s*$/i.test(row[cComp] || "")) day.compounds++;
     }
@@ -94,25 +95,28 @@
   }
 
   // ---------- data/daily.csv ----------
+  var FIELDS = ["rx", "vaccines", "compounds"];
+
   function parseDaily(text) {
-    var out = { sample: false, days: {} };
+    var out = { sample: false, days: {} }, cols = ["date", "vaccines", "compounds"];   // older files had no rx column
     String(text || "").split(/\r?\n/).forEach(function (line) {
       var raw = line.trim();
       if (!raw) return;
       if (raw[0] === "#") { if (/sample/i.test(raw)) out.sample = true; return; }
       var c = raw.split(",").map(function (x) { return x.trim(); });
+      if (/^date$/i.test(c[0])) { cols = c.map(function (x) { return x.toLowerCase(); }); return; }
       if (!/^\d{4}-\d{2}-\d{2}$/.test(c[0])) return;
-      out.days[c[0]] = { vaccines: c[1] === "" ? null : +c[1], compounds: c[2] === "" ? null : +c[2] };
+      var d = {};
+      FIELDS.forEach(function (f) { var i = cols.indexOf(f), v = i < 0 ? "" : c[i]; d[f] = v === "" || v == null ? null : +v; });
+      out.days[c[0]] = d;
     });
     return out;
   }
 
   function serializeDaily(days) {
-    var keys = Object.keys(days).sort();
-    var lines = ["date,vaccines,compounds"];
-    keys.forEach(function (k) {
-      var d = days[k];
-      lines.push(k + "," + (d.vaccines == null ? "" : d.vaccines) + "," + (d.compounds == null ? "" : d.compounds));
+    var lines = ["date," + FIELDS.join(",")];
+    Object.keys(days).sort().forEach(function (k) {
+      lines.push([k].concat(FIELDS.map(function (f) { return days[k][f] == null ? "" : days[k][f]; })).join(","));
     });
     return lines.join("\n") + "\n";
   }
@@ -126,9 +130,9 @@
     Object.keys(newDays).sort().forEach(function (k) {
       var n = newDays[k], old = base[k];
       var status = !old ? "new"
-        : (old.vaccines === n.vaccines && old.compounds === n.compounds) ? "same" : "replaced";
-      changes.push({ date: k, vaccines: n.vaccines, compounds: n.compounds, rows: n.rows, status: status, old: old || null });
-      merged[k] = { vaccines: n.vaccines, compounds: n.compounds };
+        : FIELDS.every(function (f) { return old[f] === n[f]; }) ? "same" : "replaced";
+      changes.push({ date: k, rx: n.rx, vaccines: n.vaccines, compounds: n.compounds, status: status, old: old || null });
+      merged[k] = { rx: n.rx, vaccines: n.vaccines, compounds: n.compounds };
     });
     return { text: serializeDaily(merged), changes: changes, clearedSample: ex.sample, keptDays: Object.keys(base).length };
   }

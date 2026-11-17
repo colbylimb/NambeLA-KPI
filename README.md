@@ -1,12 +1,12 @@
 # Nambe Drugs Los Alamos: Daily Scorecard
 
-A wall display for the team that shows **vaccines** and **compounds** each day and across each month, in the Nambe Drugs brand style.
+A wall display for the team that shows **total Rx**, **vaccines** and **compounds** each day and across each month, in the Nambe Drugs brand style.
 
 ![Preview](docs/preview.png)
 
 ## What's on the screen
 
-For each of **Vaccines** and **Compounds**:
+For each of **Total Rx**, **Vaccines** and **Compounds**:
 
 | Tile / chart | What it shows | Compared with |
 |---|---|---|
@@ -33,6 +33,7 @@ How the export is counted:
 
 | Count | Rule |
 |---|---|
+| **Total Rx** | Every row with a date (one row per prescription) |
 | **Vaccines** | Rows where **Therapeutic Class** contains "VACCINE" |
 | **Compounds** | Rows where **Is Compound?** is **Yes** |
 | **Day** | The **Dispensed Date** column |
@@ -74,14 +75,14 @@ No token? Click **Download daily.csv** instead. Then on GitHub, open `data/daily
 2. Set **Source** to *Deploy from a branch*, pick the branch and `/ (root)`, and click **Save**.
 3. Open the URL GitHub shows on the TV's browser in full-screen or kiosk mode.
 
-The page is built for a 1920×1080 TV and scales to 4K. It also works on phones.
+The page is laid out for a 55" 1920×1080 TV, with three columns and no scrolling. It scales to 4K. It also works on phones.
 
 ## Files
 
 ```
 index.html          the TV dashboard
 upload.html         drop-in page for the daily export
-assets/ingest.js    counts vaccines/compounds and merges by date
+assets/ingest.js    counts Rx/vaccines/compounds and merges by date
 assets/upload.js    upload page logic (saves via the GitHub API)
 assets/styles.css   brand tokens and layout
 assets/app.js       data loading, comparisons and charts (no libraries)

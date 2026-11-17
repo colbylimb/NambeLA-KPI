@@ -139,18 +139,18 @@
     $("rows").innerHTML = m.changes.map(function (c) {
       var st = c.status === "new" ? '<span class="badge ok">New day</span>'
         : c.status === "same" ? '<span class="badge muted">Already saved</span>'
-        : '<span class="badge warn">Replaces ' + fmtNum(c.old.vaccines) + " / " + fmtNum(c.old.compounds) + "</span>";
-      return "<tr><td>" + fmtDate(c.date) + '</td><td class="num"><b>' + c.vaccines + '</b></td><td class="num"><b>' + c.compounds +
-        '</b></td><td class="num muted">' + c.rows.toLocaleString() + "</td><td>" + st + "</td></tr>";
+        : '<span class="badge warn">Replaces ' + fmtNum(c.old.rx) + " / " + fmtNum(c.old.vaccines) + " / " + fmtNum(c.old.compounds) + "</span>";
+      return "<tr><td>" + fmtDate(c.date) + '</td><td class="num"><b>' + c.rx.toLocaleString() + '</b></td><td class="num"><b>' + c.vaccines +
+        '</b></td><td class="num"><b>' + c.compounds + "</b></td><td>" + st + "</td></tr>";
     }).join("");
     $("save").disabled = false; $("download").disabled = false;
   }
-  function fmtNum(n) { return n == null ? "—" : n; }
+  function fmtNum(n) { return n == null ? "—" : n.toLocaleString(); }
 
   function commitMessage(changes) {
     if (changes.length === 1) {
       var c = changes[0];
-      return "Upload " + c.date + ": " + c.vaccines + " vaccines, " + c.compounds + " compounds";
+      return "Upload " + c.date + ": " + c.rx + " Rx, " + c.vaccines + " vaccines, " + c.compounds + " compounds";
     }
     return "Upload " + changes[0].date + " to " + changes[changes.length - 1].date + " (" + changes.length + " days)";
   }

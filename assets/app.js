@@ -1,5 +1,5 @@
 /* Nambe Drugs Los Alamos — KPI wall display.
- * Reads data/daily.csv (date,vaccines,compounds), one row per day.
+ * Reads data/daily.csv (date,rx,vaccines,compounds), one row per day.
  * The CSV is updated once a day at 8 PM; this page re-checks it every
  * 10 minutes, so the screen picks up the new numbers on its own.
  */
@@ -11,6 +11,7 @@
   var UPDATE_HOUR = 20, UPDATE_GRACE_MIN = 30; // expect new data by 8:30 PM
 
   var METRICS = [
+    { key: "rx",        name: "Total Rx",  unit: "prescriptions",  icon: "pill" },
     { key: "vaccines",  name: "Vaccines",  unit: "vaccines given", icon: "syringe" },
     { key: "compounds", name: "Compounds", unit: "compounds made", icon: "flask" }
   ];
@@ -19,6 +20,7 @@
 
   var ICONS = {
     syringe: '<path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/>',
+    pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
     flask: '<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
     up: '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',
     down: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
@@ -57,7 +59,7 @@
       var cells = raw.split(",").map(function (c) { return c.trim(); });
       if (!header) {
         if (/date/i.test(cells[0])) { header = cells.map(function (c) { return c.toLowerCase(); }); return; }
-        header = ["date", "vaccines", "compounds"];
+        header = ["date", "rx", "vaccines", "compounds"];
       }
       var rec = {};
       header.forEach(function (h, i) { rec[h] = cells[i]; });
@@ -201,8 +203,8 @@
         '<div class="chart-card monthly">' +
           '<div class="chart-head"><h3>Monthly totals</h3>' +
             '<div class="note">' + [
-              c.pace != null ? "On pace for <b>" + fmtNum(c.pace) + "</b> in " + mName : "",
-              c.prevTotal != null ? pName + " finished at <b>" + fmtNum(c.prevTotal) + "</b>" : ""
+              c.pace != null ? "On pace for <b>" + fmtNum(c.pace) + "</b>" : "",
+              c.prevTotal != null ? MON[c.p.m] + " total <b>" + fmtNum(c.prevTotal) + "</b>" : ""
             ].filter(Boolean).join(" · ") + "</div></div>" +
           '<div class="chart" data-chart="monthly" data-metric="' + mt.key + '"></div>' +
         "</div>" +
@@ -279,7 +281,7 @@
 
   function frame(host, yMax, ticks) {
     var R = rem(), W = host.clientWidth, H = host.clientHeight;
-    var m = { l: 2.6 * R, r: 0.25 * R, t: 1.5 * R, b: 1.7 * R };
+    var m = { l: 3.2 * R, r: 0.25 * R, t: 1.6 * R, b: 1.9 * R };
     var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img" });
     var pw = W - m.l - m.r, ph = H - m.t - m.b;
     var scale = niceScale(yMax, ticks);
@@ -365,8 +367,8 @@
           fill: p.current ? COLORS.accent : COLORS.bar
         }));
       }
-      // Narrow screens: label only the current month and shorten month names.
-      var narrow = slot < 3.2 * R;
+      // Narrow slots: label only the current month and shorten month names.
+      var narrow = slot < 3.2 * R, tiny = slot < 2.2 * R;
       var labelled = narrow ? p.current : i >= n - 2;
       if (labelled && p.total != null) {
         var top = p.current && c.pace != null ? Math.min(f.y(p.total), f.y(c.pace)) : f.y(p.total);
@@ -377,7 +379,7 @@
           x: tx, y: top - 0.45 * R, "text-anchor": anchor, "class": p.current ? "val" : "val muted"
         }, txt));
       }
-      var lbl = narrow ? MON[p.m].charAt(0) : MON[p.m] + (p.m === 0 ? " ’" + String(p.y).slice(2) : "");
+      var lbl = tiny ? MON[p.m].charAt(0) : narrow ? MON[p.m] : MON[p.m] + (p.m === 0 ? " ’" + String(p.y).slice(2) : "");
       f.svg.appendChild(el("text", {
         x: cx, y: f.H - 0.35 * R, "text-anchor": "middle", "class": p.current ? "tick strong" : "tick"
       }, lbl));
