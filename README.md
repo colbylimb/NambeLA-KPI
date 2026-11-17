@@ -10,9 +10,8 @@ For each of **Total Rx**, **Vaccines** and **Compounds**:
 
 | Tile / chart | What it shows | Compared with |
 |---|---|---|
-| **Today** (green tile) | Count for the latest day in the data | The same date last month (Nov 16 vs Oct 16) |
+| **Today** (green tile, top) | Count for the latest day in the data | The same date last month (Nov 16 vs Oct 16) |
 | **Month to date** | Total from the 1st through the latest day | The same days last month (Nov 1–16 vs Oct 1–16) |
-| **Day by day** | This month's daily bars (green), with last month's same dates as gray bars behind them. The latest day is lime. | |
 | **Monthly totals** | The last 12 months. The current month shows the total so far (lime) and a dashed outline for where it's on pace to finish. | |
 
 Counts are by the day each Rx was entered.

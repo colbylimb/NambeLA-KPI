@@ -16,7 +16,7 @@
     { key: "compounds", name: "Compounds", unit: "compounds made", icon: "flask" }
   ];
 
-  var COLORS = { bar: "#1D7A4D", accent: "#50B341", ghost: "#D3DAD6", surface: "#FFFFFF" };
+  var COLORS = { bar: "#1D7A4D", accent: "#50B341", surface: "#FFFFFF" };
 
   var ICONS = {
     syringe: '<path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/>',
@@ -126,16 +126,7 @@
       mtdPrev: sumRange(metric, p.y, p.m, 1, pd)
     };
 
-    // Daily series for this month and last month (by day of month).
-    var dimCur = daysIn(y, m), dimPrev = daysIn(p.y, p.m);
-    out.daily = [];
-    for (var i = 1; i <= dimCur; i++) {
-      out.daily.push({
-        day: i,
-        cur: i <= d ? val(metric, y, m, i) : null,
-        prev: i <= dimPrev ? val(metric, p.y, p.m, i) : null
-      });
-    }
+    var dimCur = daysIn(y, m);
 
     // Last 12 months of totals, current month = month to date.
     out.monthly = [];
@@ -183,22 +174,16 @@
         '<div class="kpis">' +
           '<div class="kpi is-primary">' +
             '<div class="overline">' + dayLabel(c.y, c.m, c.d) + "</div>" +
-            '<div class="value">' + fmtNum(c.day) + "</div>" +
+            '<div class="kpi-row"><div class="value">' + fmtNum(c.day) + "</div>" +
             '<div class="compare">' + deltaPill(c.day, c.dayPrev) +
-              compareText(c.dayPrev, fmtShort(c.p.y, c.p.m, c.pd)) + "</div>" +
+              compareText(c.dayPrev, fmtShort(c.p.y, c.p.m, c.pd)) + "</div></div>" +
           "</div>" +
           '<div class="kpi">' +
             '<div class="overline">' + mName + " to date · " + MON[c.m] + " 1–" + c.d + "</div>" +
-            '<div class="value">' + fmtNum(c.mtd) + "</div>" +
+            '<div class="kpi-row"><div class="value">' + fmtNum(c.mtd) + "</div>" +
             '<div class="compare">' + deltaPill(c.mtd, c.mtdPrev) +
-              compareText(c.mtdPrev, MON[c.p.m] + " 1–" + c.pd) + "</div>" +
+              compareText(c.mtdPrev, MON[c.p.m] + " 1–" + c.pd) + "</div></div>" +
           "</div>" +
-        "</div>" +
-        '<div class="chart-card daily">' +
-          '<div class="chart-head"><h3>' + mName + ", day by day</h3>" +
-            '<div class="legend"><span><i style="background:' + COLORS.bar + '"></i>' + mName + "</span>" +
-            '<span><i style="background:' + COLORS.ghost + '"></i>' + pName + " (same date)</span></div></div>" +
-          '<div class="chart" data-chart="daily" data-metric="' + mt.key + '"></div>' +
         "</div>" +
         '<div class="chart-card monthly">' +
           '<div class="chart-head"><h3>Monthly totals</h3>' +
@@ -294,58 +279,6 @@
     return { svg: svg, W: W, H: H, m: m, pw: pw, ph: ph, y: y, R: R };
   }
 
-  function drawDaily(host, c) {
-    var data = c.daily, n = data.length;
-    var maxV = Math.max.apply(null, data.map(function (p) { return Math.max(p.cur || 0, p.prev || 0); }));
-    var f = frame(host, maxV, 4), slot = f.pw / n, R = f.R;
-    var ghostW = Math.max(4, slot * 0.78), curW = Math.max(3, slot * 0.5);
-    var base = f.y(0);
-
-    data.forEach(function (p, i) {
-      var cx = f.m.l + slot * i + slot / 2;
-      if (p.prev != null && p.prev > 0) {
-        f.svg.appendChild(el("path", { d: barPath(cx - ghostW / 2, f.y(p.prev), ghostW, base - f.y(p.prev), 4), fill: COLORS.ghost }));
-      }
-      if (p.cur != null && p.cur > 0) {
-        var isLatest = p.day === c.d;
-        f.svg.appendChild(el("path", {
-          d: barPath(cx - curW / 2, f.y(p.cur), curW, base - f.y(p.cur), 4),
-          fill: isLatest ? COLORS.accent : COLORS.bar,
-          stroke: COLORS.surface, "stroke-width": 2, "paint-order": "stroke"
-        }));
-      }
-      // hover target + native tooltip
-      var hit = el("rect", { x: f.m.l + slot * i, y: f.m.t, width: slot, height: f.ph, fill: "transparent" });
-      hit.appendChild(el("title", {}, fmtShort(c.y, c.m, p.day) + ": " + fmtNum(p.cur) + "  ·  " +
-        fmtShort(c.p.y, c.p.m, p.day) + ": " + fmtNum(p.prev)));
-      f.svg.appendChild(hit);
-    });
-
-    // Value label on the latest day.
-    var latest = data[c.d - 1];
-    if (latest && latest.cur != null) {
-      var lx = f.m.l + slot * (c.d - 1) + slot / 2;
-      var top = Math.min(f.y(latest.cur), latest.prev != null ? f.y(latest.prev) : Infinity);
-      f.svg.appendChild(el("text", { x: lx, y: top - 0.45 * R, "text-anchor": "middle", "class": "val" }, fmtNum(latest.cur)));
-    }
-
-    // Day-of-month ticks: 1, every 5th, last day, and the latest day (bold).
-    var show = {};
-    show[1] = true; for (var k = 5; k <= n; k += 5) show[k] = true; show[n] = true;
-    Object.keys(show).forEach(function (k) { if (Math.abs(+k - c.d) < 2) delete show[k]; });
-    if (n - 30 < 2 && show[n] && show[30] && n !== 30) delete show[30];
-    show[c.d] = "strong";
-    Object.keys(show).forEach(function (k) {
-      f.svg.appendChild(el("text", {
-        x: f.m.l + slot * (+k - 1) + slot / 2, y: f.H - 0.35 * R, "text-anchor": "middle",
-        "class": show[k] === "strong" ? "tick strong" : "tick"
-      }, k));
-    });
-
-    f.svg.setAttribute("aria-label", MONTHS[c.m] + " daily counts compared with " + MONTHS[c.p.m]);
-    host.replaceChildren(f.svg);
-  }
-
   function drawMonthly(host, c) {
     var data = c.monthly, n = data.length;
     var maxV = Math.max(c.pace || 0, Math.max.apply(null, data.map(function (p) { return p.total || 0; })));
@@ -396,8 +329,7 @@
     document.querySelectorAll("[data-chart]").forEach(function (host) {
       var c = computed[host.getAttribute("data-metric")];
       if (!c) return;
-      if (host.getAttribute("data-chart") === "daily") drawDaily(host, c);
-      else drawMonthly(host, c);
+      drawMonthly(host, c);
     });
   }
 

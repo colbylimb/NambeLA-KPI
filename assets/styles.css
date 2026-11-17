@@ -137,27 +137,31 @@ body.has-pointer { cursor: default; }
 }
 
 /* KPI tiles */
-.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+.kpis { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
 .kpi {
   border: 1px solid var(--ink-100);
   border-radius: var(--radius-card);
-  padding: 0.95rem 1.1rem 1rem;
+  padding: 1.1rem 1.35rem 1.2rem;
   background: var(--surface);
 }
 .kpi.is-primary { background: linear-gradient(135deg, var(--forest), var(--pine)); border-color: transparent; color: #fff; }
 .overline {
-  font-size: 0.8rem; line-height: 1.1rem; font-weight: 600;
+  font-size: 0.95rem; line-height: 1.3rem; font-weight: 600;
   letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--ink-600);
 }
 .kpi.is-primary .overline { color: rgba(255,255,255,.78); }
+.kpi-row {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
+  margin-top: 0.6rem;
+}
 .kpi .value {
-  font-size: 4.4rem; line-height: 1; font-weight: 700; letter-spacing: -0.03em;
-  margin: 0.5rem 0 0.65rem;
+  font-size: 6.25rem; line-height: 0.9; font-weight: 700; letter-spacing: -0.035em;
 }
 .kpi .compare {
-  display: flex; align-items: center; gap: 0.35rem 0.55rem; flex-wrap: wrap;
-  font-size: 1rem; line-height: 1.35rem; color: var(--ink-600);
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;
+  text-align: right; padding-bottom: 0.15rem;
+  font-size: 1.1rem; line-height: 1.45rem; color: var(--ink-600);
 }
 .kpi.is-primary .compare { color: rgba(255,255,255,.85); }
 .kpi .compare b { color: var(--ink-900); font-weight: 600; }
@@ -165,10 +169,10 @@ body.has-pointer { cursor: default; }
 
 .delta {
   display: inline-flex; align-items: center; gap: 0.3rem;
-  border-radius: 999px; padding: 0.22rem 0.65rem;
-  font-size: 0.95rem; font-weight: 700;
+  border-radius: 999px; padding: 0.3rem 0.8rem;
+  font-size: 1.25rem; font-weight: 700;
 }
-.delta svg { width: 0.95rem; height: 0.95rem; }
+.delta svg { width: 1.2rem; height: 1.2rem; }
 .delta.up   { background: var(--success-bg); color: #13703D; }
 .delta.down { background: var(--error-bg);   color: #A32B2B; }
 .delta.flat { background: var(--ink-100);    color: var(--ink-800); }
@@ -181,7 +185,6 @@ body.has-pointer { cursor: default; }
   border-radius: var(--radius-card);
   padding: 0.9rem 1.1rem 0.6rem;
 }
-.chart-card.daily { flex-grow: 1.15; }
 .chart-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
   margin-bottom: 0.35rem;
@@ -231,7 +234,9 @@ body.has-pointer { cursor: default; }
   .clock .time { font-size: 1.25rem; }
   .grid { grid-template-columns: 1fr; }
   .panel { padding: 16px; }
-  .kpi .value { font-size: 2.75rem; }
+  .kpi .value { font-size: 3.25rem; }
+  .kpi .compare { font-size: 0.95rem; }
+  .delta { font-size: 1rem; }
   .chart-card { flex: none; }
   .chart { flex: none; height: 220px; }
   .chart-head { flex-wrap: wrap; }
