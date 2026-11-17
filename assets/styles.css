@@ -107,6 +107,50 @@ body.has-pointer { cursor: default; }
 }
 .clock .date { font-size: 0.95rem; color: var(--ink-600); }
 
+.gear {
+  width: 2.75rem; height: 2.75rem; border-radius: 12px; flex: none;
+  display: grid; place-items: center;
+  color: var(--ink-400); text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.gear svg { width: 1.5rem; height: 1.5rem; }
+.gear:hover, .gear:focus-visible { background: var(--mint); color: var(--pine); outline: none; }
+
+/* ---------- After-hours screensaver ---------- */
+.screensaver {
+  position: fixed; inset: 0; z-index: 100;
+  background: linear-gradient(135deg, var(--forest) 0%, var(--pine) 100%);
+  color: #fff; overflow: hidden;
+  display: grid; place-items: center;
+  opacity: 0; transition: opacity 1.2s ease;
+}
+.screensaver.is-on { opacity: 1; }
+.screensaver[hidden] { display: none; }
+.ss-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ss-content {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  transition: transform 6s ease-in-out;
+}
+.ss-badge {
+  background: #fff; border-radius: 28px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, .16);
+  margin-bottom: 3rem;
+}
+.ss-badge img { display: block; height: 11rem; width: auto; }
+.ss-time {
+  font-size: 9rem; line-height: 1; font-weight: 700; letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.ss-date {
+  margin-top: 1rem;
+  font-size: 2rem; line-height: 2.5rem; font-weight: 500; color: var(--mint);
+}
+.ss-rule { width: 4rem; height: 4px; border-radius: 4px; background: var(--lime); margin: 2.25rem 0 1.75rem; }
+.ss-tag { font-size: 1.6rem; font-weight: 600; color: rgba(255, 255, 255, .92); }
+.ss-tag span { color: #8FD982; }
+
 /* ---------- Panels ---------- */
 .grid {
   min-height: 0;
@@ -228,6 +272,8 @@ body.has-pointer { cursor: default; }
   .app { height: auto; padding: 16px; gap: 16px; }
   .topbar { flex-wrap: wrap; padding: 12px 16px; gap: 12px; }
   .topbar .divider, .topbar .spacer { display: none; }
+  .gear { position: absolute; top: 12px; right: 12px; }
+  .topbar { position: relative; }
   .topbar .logo { height: 44px; }
   .title-block h1 { font-size: 1.5rem; line-height: 2rem; }
   .clock { text-align: left; width: 100%; display: flex; gap: 12px; align-items: baseline; }
@@ -343,4 +389,11 @@ html:has(body.page-upload) { font-size: 16px; }
   .form { grid-template-columns: 1fr; }
   .page-upload .topbar .divider, .page-upload .topbar .spacer { display: none; }
   .up-card { padding: 16px; }
+}
+
+@media (max-width: 700px) {
+  .ss-badge img { height: 7rem; }
+  .ss-time { font-size: 5rem; white-space: nowrap; }
+  .ss-date { font-size: 1.4rem; }
+  .ss-tag { font-size: 1.2rem; }
 }

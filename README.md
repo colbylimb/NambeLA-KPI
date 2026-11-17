@@ -20,7 +20,7 @@ When last month is shorter, the comparison uses its last day. For example, Mar 3
 
 ## Updating the numbers: drop in the export
 
-Open **`upload.html`** on the dashboard site (for example `https://<your-pages-url>/upload.html`) on any computer. This is the manual option; see *Automatic nightly update* below for the hands-off setup.
+Click the **gear icon** in the dashboard's top-right corner, or open **`upload.html`** on the dashboard site (for example `https://<your-pages-url>/upload.html`) on any computer. This is the manual option; see *Automatic nightly update* below for the hands-off setup.
 
 ![Upload page](docs/upload.png)
 
@@ -67,11 +67,19 @@ The plan is hands-off. The pharmacy system emails the CSV export at 11:45 PM. At
 
 To set it up, paste [`docs/power-automate-setup-prompt.md`](docs/power-automate-setup-prompt.md) into a Claude chat and follow along.
 
+## Display hours and screensaver
+
+The dashboard shows from **8 AM to 7 PM**. The rest of the time a branded screensaver shows the logo, the time and the date, and drifts slightly each minute to protect the TV. Change the hours with `SHOW_FROM` / `SHOW_UNTIL` at the top of `assets/app.js`. Add `?mode=dashboard` or `?mode=screensaver` to the URL to force one view.
+
+## Raspberry Pi kiosk
+
+See [`docs/raspberry-pi-kiosk.md`](docs/raspberry-pi-kiosk.md). Point the Pi at https://colbylimb.github.io/NambeLA-KPI/
+
 ## How the screen stays current
 
 - The page re-reads `daily.csv` every 10 minutes, so the nightly update appears on its own. Nobody has to touch the TV.
 - The header pill turns **amber** ("Waiting on nightly update") if it's after 12:30 AM and yesterday's row isn't in the file yet. It turns **red** if the file can't be loaded. In that case the last numbers stay on screen.
-- The page fully reloads at 3 AM each night to pick up any design changes.
+- The page fully reloads at 3 AM each night to pick up any design changes, but only when the site is reachable.
 - The mouse cursor hides itself on the display.
 
 ## Hosting (GitHub Pages)

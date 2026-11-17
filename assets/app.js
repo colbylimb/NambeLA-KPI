@@ -11,6 +11,10 @@
   // A day's counts arrive at ~11:59 PM that night; allow until 12:30 AM before flagging them late.
   var DUE_AFTER_MIN = 24 * 60 + 30;   // minutes after the start of a day that its data is due
 
+  // The dashboard shows from 8:00 AM until 7:00 PM; the branded screensaver runs the rest of the time.
+  // Add ?mode=dashboard or ?mode=screensaver to the URL to force one (handy for testing).
+  var SHOW_FROM = 8, SHOW_UNTIL = 19;
+
   var METRICS = [
     { key: "rx",        name: "Rx Processed", unit: "prescriptions",  icon: "pill" },
     { key: "vaccines",  name: "Vaccines",  unit: "vaccines given", icon: "syringe" },
@@ -343,14 +347,52 @@
     clearTimeout(window.__ptr); window.__ptr = setTimeout(function () { document.body.classList.remove("has-pointer"); }, 3000);
   });
 
+  // ---------- After-hours screensaver ----------
+  var forced = (/[?&]mode=(dashboard|screensaver)/.exec(location.search) || [])[1] || null;
+  var peekUntil = 0;   // a tap/click/key on the screensaver shows the dashboard for 2 minutes
+  function wantScreensaver(now) {
+    if (forced) return forced === "screensaver";
+    if (Date.now() < peekUntil) return false;
+    var h = now.getHours();
+    return h < SHOW_FROM || h >= SHOW_UNTIL;
+  }
+  function tickScreensaver() {
+    var now = new Date(), ss = document.getElementById("screensaver"), on = wantScreensaver(now);
+    document.getElementById("ss-time").textContent = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    document.getElementById("ss-date").textContent = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    if (on && ss.hidden) { ss.hidden = false; requestAnimationFrame(function () { ss.classList.add("is-on"); }); }
+    if (!on && !ss.hidden) {
+      ss.classList.remove("is-on");
+      setTimeout(function () { if (!wantScreensaver(new Date())) { ss.hidden = true; drawCharts(); } }, 1200);
+    }
+  }
+  // Drift the content a little every minute so nothing burns into the TV.
+  function drift() {
+    var c = document.getElementById("ss-content");
+    var x = (Math.random() * 2 - 1) * 6, y = (Math.random() * 2 - 1) * 5;
+    c.style.transform = "translate(" + x.toFixed(2) + "vw," + y.toFixed(2) + "vh)";
+  }
+  ["click", "keydown", "touchstart"].forEach(function (t) {
+    document.getElementById("screensaver").addEventListener(t, function () { peekUntil = Date.now() + 2 * 60 * 1000; tickScreensaver(); });
+  });
+
   tickClock();
-  setInterval(function () { tickClock(); renderStatus(); }, 15 * 1000);
+  tickScreensaver();
+  drift();
+  setInterval(function () { tickClock(); renderStatus(); tickScreensaver(); }, 15 * 1000);
+  setInterval(drift, 60 * 1000);
   load();
   setInterval(load, REFRESH_MS);
 
   // Full reload once a night (3 AM) so the screen picks up any page changes too.
+  // Only reload when the site is reachable, so a Wi-Fi blip never leaves the kiosk on an error page.
+  function safeReload() {
+    fetch("index.html?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (r.ok) location.reload(); else throw new Error("HTTP " + r.status); })
+      .catch(function () { setTimeout(safeReload, 5 * 60 * 1000); });
+  }
   (function scheduleReload() {
     var now = new Date(), next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 3, 0, 0);
-    setTimeout(function () { location.reload(); }, next - now);
+    setTimeout(safeReload, next - now);
   })();
 })();
